@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# 고급 문서 인덱스 생성 스크립트
+
+INDEX_FILE="temp_docs_index.md"
+
+echo "## 📚 Documentation" > $INDEX_FILE
+echo "" >> $INDEX_FILE
+
+# 카테고리별 매핑 정의
+declare -A categories=(
+    ["setup"]="🚀 Setup & Installation"
+    ["api"]="📖 API Reference"
+    ["guides"]="📚 Guides"
+    ["tutorials"]="🎓 Tutorials"
+    ["advanced"]="🔧 Advanced"
+    ["contributing"]="🤝 Contributing"
+)
+
+# 각 카테고리별로 처리
+for category in "${!categories[@]}"; do
+    category_path="docs/$category"
+    
+    if [ -d "$category_path" ]; then
+        echo "### ${categories[$category]}" >> $INDEX_FILE
+        echo "" >> $INDEX_FILE
+        
+        find "$category_path" -name "*.md" -type f | sort | while read file; do
+            # 파일에서 제목과 설명 추출
+            title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //')
+            description=$(head -50 "$file" | grep -m 1 "^>" | sed 's/^> //')
+            
+            if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+            fi
+            
+            if [ -n "$description" ]; then
+                echo "- [$title](./$file) - $description" >> $INDEX_FILE
+            else
+                echo "- [$title](./$file)" >> $INDEX_FILE
+            fi
+        done
+        echo "" >> $INDEX_FILE
+    fi
+done
+
+# 최근 수정된 문서 섹션 추가
+echo "### 📝 Recently Updated" >> $INDEX_FILE
+echo "" >> $INDEX_FILE
+
+find docs -name "*.md" -type f -printf '%T@ %p\n' | sort -rn | head -5 | while read timestamp file; do
+    title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+    if [ -z "$title" ]; then
+        title=$(basename "$file" .md)
+    fi
+    
+    # 수정 날짜 포맷팅
+    date=$(date -d "@${timestamp%.*}" "+%Y-%m-%d")
+    echo "- [$title](./$file) *(updated: $date)*" >> $INDEX_FILE
+done
+
+echo "" >> $INDEX_FILE
+
+# 통계 정보 추가
+total_docs=$(find docs -name "*.md" -type f | wc -l)
+echo "---" >> $INDEX_FILE
+echo "*Total documents: $total_docs*" >> $INDEX_FILE
