@@ -2,7 +2,7 @@
 
 # 고급 문서 인덱스 생성 스크립트
 
-INDEX_FILE="temp_docs_index.md"
+INDEX_FILE="README.md"
 
 echo "## 📚 Documentation" > $INDEX_FILE
 echo "" >> $INDEX_FILE
