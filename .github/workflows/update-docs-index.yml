@@ -1,67 +1,137 @@
-#!/bin/bash
+name: Update Documentation Index
 
-# 고급 문서 인덱스 생성 스크립트
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "docs/**/*.md"
+      - "tutorials/**/*.md"
+      - ".github/workflows/update-docs-index.yml"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "docs/**/*.md"
+      - "tutorials/**/*.md"
 
-INDEX_FILE="README.md"
+permissions:
+  contents: write
+  pull-requests: write
 
-echo "## 📚 Documentation" > $INDEX_FILE
-echo "" >> $INDEX_FILE
+jobs:
+  update-docs-index:
+    runs-on: ubuntu-latest
 
-# 카테고리별 매핑 정의
-declare -A categories=(
-    ["setup"]="🚀 Setup & Installation"
-    ["api"]="📖 API Reference"
-    ["guides"]="📚 Guides"
-    ["tutorials"]="🎓 Tutorials"
-    ["advanced"]="🔧 Advanced"
-    ["contributing"]="🤝 Contributing"
-)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-# 각 카테고리별로 처리
-for category in "${!categories[@]}"; do
-    category_path="docs/$category"
-    
-    if [ -d "$category_path" ]; then
-        echo "### ${categories[$category]}" >> $INDEX_FILE
-        echo "" >> $INDEX_FILE
-        
-        find "$category_path" -name "*.md" -type f | sort | while read file; do
-            # 파일에서 제목과 설명 추출
-            title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //')
-            description=$(head -50 "$file" | grep -m 1 "^>" | sed 's/^> //')
+      - name: Generate documentation index
+        run: |
+          INDEX_FILE="temp_docs_index.md"
+
+          echo "## 📚 Documentation" > $INDEX_FILE
+          echo "" >> $INDEX_FILE
+
+          if [ -d "docs" ]; then
+            echo "### 📖 Guides" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
             
-            if [ -z "$title" ]; then
+            find docs -name "*.md" -type f | sort | while read file; do
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+              
+              if [ -z "$title" ]; then
                 title=$(basename "$file" .md)
-            fi
+              fi
+              
+              echo "- [$title](./$file)" >> $INDEX_FILE
+            done
+            echo "" >> $INDEX_FILE
+          fi
+
+          if [ -d "tutorials" ]; then
+            echo "### 🎓 Tutorials" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
             
-            if [ -n "$description" ]; then
-                echo "- [$title](./$file) - $description" >> $INDEX_FILE
-            else
-                echo "- [$title](./$file)" >> $INDEX_FILE
+            find tutorials -name "*.md" -type f | sort | while read file; do
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+              
+              if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+              fi
+              
+              echo "- [$title](./$file)" >> $INDEX_FILE
+            done
+            echo "" >> $INDEX_FILE
+          fi
+
+          echo "### 📋 Other Documents" >> $INDEX_FILE
+          echo "" >> $INDEX_FILE
+
+          for file in CONTRIBUTING.md CHANGELOG.md LICENSE.md CODE_OF_CONDUCT.md; do
+            if [ -f "$file" ]; then
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+              if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+              fi
+              echo "- [$title](./$file)" >> $INDEX_FILE
             fi
-        done
-        echo "" >> $INDEX_FILE
-    fi
-done
+          done
 
-# 최근 수정된 문서 섹션 추가
-echo "### 📝 Recently Updated" >> $INDEX_FILE
-echo "" >> $INDEX_FILE
+          echo "Generated documentation index:"
+          cat $INDEX_FILE
 
-find docs -name "*.md" -type f -printf '%T@ %p\n' | sort -rn | head -5 | while read timestamp file; do
-    title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
-    if [ -z "$title" ]; then
-        title=$(basename "$file" .md)
-    fi
-    
-    # 수정 날짜 포맷팅
-    date=$(date -d "@${timestamp%.*}" "+%Y-%m-%d")
-    echo "- [$title](./$file) *(updated: $date)*" >> $INDEX_FILE
-done
+      - name: Update README.md
+        run: |
+          INDEX_FILE="temp_docs_index.md"
 
-echo "" >> $INDEX_FILE
+          if [ ! -f "README.md" ]; then
+            echo "README.md not found, creating new one"
+            echo "# Project Documentation" > README.md
+            echo "" >> README.md
+            echo "<!-- DOCS_INDEX_START -->" >> README.md
+            echo "<!-- DOCS_INDEX_END -->" >> README.md
+          fi
 
-# 통계 정보 추가
-total_docs=$(find docs -name "*.md" -type f | wc -l)
-echo "---" >> $INDEX_FILE
-echo "*Total documents: $total_docs*" >> $INDEX_FILE
+          if ! grep -q "<!-- DOCS_INDEX_START -->" README.md; then
+            echo "" >> README.md
+            echo "<!-- DOCS_INDEX_START -->" >> README.md
+            echo "<!-- DOCS_INDEX_END -->" >> README.md
+          fi
+
+          awk '
+            /<!-- DOCS_INDEX_START -->/ { 
+              print $0
+              system("cat '$INDEX_FILE'")
+              skip=1
+              next
+            }
+            /<!-- DOCS_INDEX_END -->/ { 
+              skip=0
+            }
+            !skip
+          ' README.md > README_new.md
+
+          mv README_new.md README.md
+          rm $INDEX_FILE
+
+          echo "Updated README.md with new documentation index"
+
+      - name: Check for changes
+        id: verify-changed-files
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.verify-changed-files.outputs.changed == 'true'
+        run: |
+          git config --local user.email "abgoeun3339@gmail.com"
+          git config --local user.name "goeun23"
+          git add README.md
+          git commit -m "📚 Auto-update documentation index"
+          git push
