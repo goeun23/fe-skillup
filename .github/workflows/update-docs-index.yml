@@ -35,7 +35,7 @@ jobs:
           echo "" >> $INDEX_FILE
 
           if [ -d "React" ]; then
-            echo "### 📖 Guides" >> $INDEX_FILE
+            echo "### 📖 React" >> $INDEX_FILE
             echo "" >> $INDEX_FILE
             
             find docs -name "*.md" -type f | sort | while read file; do
@@ -51,7 +51,7 @@ jobs:
           fi
 
           if [ -d "Next" ]; then
-            echo "### 🎓 Tutorials" >> $INDEX_FILE
+            echo "### 🎓 Next" >> $INDEX_FILE
             echo "" >> $INDEX_FILE
             
             find tutorials -name "*.md" -type f | sort | while read file; do
