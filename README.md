@@ -5,10 +5,10 @@
 <!-- DOCS_INDEX_START -->
 ## 📚 Documentation
 
-### 📖 Guides
+### 📖 React
 
 
-### 🎓 Tutorials
+### 🎓 Next
 
 
 ### 📋 Other Documents
