@@ -34,7 +34,7 @@ jobs:
           echo "## 📚 Documentation" > $INDEX_FILE
           echo "" >> $INDEX_FILE
 
-          if [ -d "docs" ]; then
+          if [ -d "React" ]; then
             echo "### 📖 Guides" >> $INDEX_FILE
             echo "" >> $INDEX_FILE
             
@@ -50,7 +50,7 @@ jobs:
             echo "" >> $INDEX_FILE
           fi
 
-          if [ -d "tutorials" ]; then
+          if [ -d "Next" ]; then
             echo "### 🎓 Tutorials" >> $INDEX_FILE
             echo "" >> $INDEX_FILE
             
