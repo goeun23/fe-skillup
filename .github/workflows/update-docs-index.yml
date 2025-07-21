@@ -5,13 +5,17 @@ on:
     branches: [main, master]
     paths:
       - "docs/**/*.md"
-      - "tutorials/**/*.md"
+      - "Next/**/*.md"
+      - "React/**/*.md"
+      - "Others/**/*.md"
       - ".github/workflows/update-docs-index.yml"
   pull_request:
     branches: [main, master]
     paths:
       - "docs/**/*.md"
-      - "tutorials/**/*.md"
+      - "React/**/*.md"
+      - "Next/**/*.md"
+      - "Others/**/*.md"
 
 permissions:
   contents: write
@@ -52,6 +56,22 @@ jobs:
 
           if [ -d "Next" ]; then
             echo "### 🎓 Next" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            
+            find tutorials -name "*.md" -type f | sort | while read file; do
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+              
+              if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+              fi
+              
+              echo "- [$title](./$file)" >> $INDEX_FILE
+            done
+            echo "" >> $INDEX_FILE
+          fi
+
+          if [ -d "Others" ]; then
+            echo "### 🎓 Others" >> $INDEX_FILE
             echo "" >> $INDEX_FILE
             
             find tutorials -name "*.md" -type f | sort | while read file; do
