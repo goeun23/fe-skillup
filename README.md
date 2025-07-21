@@ -24,9 +24,8 @@
 
 - [Next의 pre-rendering](./Next/1-2.pre-rendering.md)
 - [Next란](./Next/1.next.md)
-  - **📁 Page Router**
-    - [Next-Page Router](./Next/Page Router/2.Page-Router.md)
-    - [Next pre-fetching](./Next/Page Router/pre-feching.md)
+- [Next-Page Router](./Next/Page Router/2.Page-Router.md)
+- [Next pre-fetching](./Next/Page Router/pre-feching.md)
 
 ### 📝 Others
 
