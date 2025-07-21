@@ -11,6 +11,9 @@
 ### 🎓 Next
 
 
+### 🎓 Others
+
+
 ### 📋 Other Documents
 
 <!-- DOCS_INDEX_END -->
