@@ -24,8 +24,8 @@
 
 - [Next의 pre-rendering](./Next/1-2.pre-rendering.md)
 - [Next란](./Next/1.next.md)
-- [Next-Page Router](./Next/Page Router/2.Page-Router.md)
-- [Next pre-fetching](./Next/Page Router/pre-feching.md)
+  - **Page Router/** [Next-Page Router](./Next/Page Router/2.Page-Router.md)
+  - **Page Router/** [Next pre-fetching](./Next/Page Router/pre-feching.md)
 
 ### 📝 Others
 
@@ -42,9 +42,8 @@
 ## 📝 Change Log
 
 
-### 📊 프로젝트 통계
+### 📊 statstics
 
 - **총 커밋 수**: 1
-- **기여자 수**: 1
-- **마지막 업데이트**: 2025-07-21 01:14:23
+- **마지막 업데이트**: 2025-07-21 01:23:31
 <!-- CHANGELOG_END -->
