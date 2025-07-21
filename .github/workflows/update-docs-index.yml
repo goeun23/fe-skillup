@@ -31,6 +31,47 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug file structure
+        run: |
+          echo "=== Repository structure ==="
+          find . -name "*.md" -type f | head -20
+          echo ""
+          echo "=== React folder contents ==="
+          if [ -d "React" ]; then
+            ls -la React/
+            echo "React .md files:"
+            find React -name "*.md" -type f | head -10
+          else
+            echo "React folder not found"
+          fi
+          echo ""
+          echo "=== Next folder contents ==="  
+          if [ -d "Next" ]; then
+            ls -la Next/
+            echo "Next .md files:"
+            find Next -name "*.md" -type f | head -10
+          else
+            echo "Next folder not found"
+          fi
+          echo ""
+          echo "=== Others folder contents ==="
+          if [ -d "Others" ]; then
+            ls -la Others/
+            echo "Others .md files:"
+            find Others -name "*.md" -type f | head -10
+          else
+            echo "Others folder not found"
+          fi
+          echo ""
+          echo "=== docs folder contents ==="
+          if [ -d "docs" ]; then
+            ls -la docs/
+            echo "docs .md files:"
+            find docs -name "*.md" -type f | head -10
+          else
+            echo "docs folder not found"
+          fi
+
       - name: Generate documentation index
         run: |
           INDEX_FILE="temp_docs_index.md"
@@ -38,12 +79,64 @@ jobs:
           echo "## 📚 Documentation" > $INDEX_FILE
           echo "" >> $INDEX_FILE
 
-          if [ -d "React" ]; then
+          # React 문서
+          if [ -d "React" ] && [ "$(find React -name "*.md" -type f | wc -l)" -gt 0 ]; then
             echo "### 📖 React" >> $INDEX_FILE
             echo "" >> $INDEX_FILE
             
+            find React -name "*.md" -type f | sort | while read file; do
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
+              
+              if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+              fi
+              
+              echo "- [$title](./$file)" >> $INDEX_FILE
+            done
+            echo "" >> $INDEX_FILE
+          fi
+
+          # Next 문서
+          if [ -d "Next" ] && [ "$(find Next -name "*.md" -type f | wc -l)" -gt 0 ]; then
+            echo "### 🚀 Next" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            
+            find Next -name "*.md" -type f | sort | while read file; do
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
+              
+              if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+              fi
+              
+              echo "- [$title](./$file)" >> $INDEX_FILE
+            done
+            echo "" >> $INDEX_FILE
+          fi
+
+          # Others 문서
+          if [ -d "Others" ] && [ "$(find Others -name "*.md" -type f | wc -l)" -gt 0 ]; then
+            echo "### 📝 Others" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            
+            find Others -name "*.md" -type f | sort | while read file; do
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
+              
+              if [ -z "$title" ]; then
+                title=$(basename "$file" .md)
+              fi
+              
+              echo "- [$title](./$file)" >> $INDEX_FILE
+            done
+            echo "" >> $INDEX_FILE
+          fi
+
+          # docs 폴더 (기존 docs 폴더가 있다면)
+          if [ -d "docs" ] && [ "$(find docs -name "*.md" -type f | wc -l)" -gt 0 ]; then
+            echo "### 📋 Documentation" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            
             find docs -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
               
               if [ -z "$title" ]; then
                 title=$(basename "$file" .md)
@@ -54,44 +147,13 @@ jobs:
             echo "" >> $INDEX_FILE
           fi
 
-          if [ -d "Next" ]; then
-            echo "### 🎓 Next" >> $INDEX_FILE
-            echo "" >> $INDEX_FILE
-            
-            find tutorials -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
-              
-              if [ -z "$title" ]; then
-                title=$(basename "$file" .md)
-              fi
-              
-              echo "- [$title](./$file)" >> $INDEX_FILE
-            done
-            echo "" >> $INDEX_FILE
-          fi
-
-          if [ -d "Others" ]; then
-            echo "### 🎓 Others" >> $INDEX_FILE
-            echo "" >> $INDEX_FILE
-            
-            find tutorials -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
-              
-              if [ -z "$title" ]; then
-                title=$(basename "$file" .md)
-              fi
-              
-              echo "- [$title](./$file)" >> $INDEX_FILE
-            done
-            echo "" >> $INDEX_FILE
-          fi
-
+          # 기타 중요 문서들
           echo "### 📋 Other Documents" >> $INDEX_FILE
           echo "" >> $INDEX_FILE
 
           for file in CONTRIBUTING.md CHANGELOG.md LICENSE.md CODE_OF_CONDUCT.md; do
             if [ -f "$file" ]; then
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' || basename "$file" .md)
+              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
               if [ -z "$title" ]; then
                 title=$(basename "$file" .md)
               fi
@@ -101,6 +163,12 @@ jobs:
 
           echo "Generated documentation index:"
           cat $INDEX_FILE
+          echo ""
+          echo "=== Final verification ==="
+          echo "Total .md files found:"
+          find . -name "*.md" -type f | wc -l
+          echo "Index file size:"
+          wc -l $INDEX_FILE
 
       - name: Update README.md
         run: |
@@ -138,6 +206,89 @@ jobs:
 
           echo "Updated README.md with new documentation index"
 
+      - name: Generate and add changelog to README
+        run: |
+          CHANGELOG_SECTION="temp_changelog.md"
+
+          echo "" > $CHANGELOG_SECTION
+          echo "## 📝 Change Log" >> $CHANGELOG_SECTION
+          echo "" >> $CHANGELOG_SECTION
+
+          # 최근 20개 커밋 가져오기 (문서 업데이트 커밋 제외)
+          git log --oneline -20 --pretty=format:"%h|%cd|%s|%an" --date=format:"%Y-%m-%d %H:%M" \
+            --grep="Auto-update documentation" --invert-grep > commits.txt
+
+          # 날짜별로 그룹화하여 출력
+          current_date=""
+
+          while IFS='|' read -r hash date message author; do
+            commit_date=$(echo "$date" | cut -d' ' -f1)
+            commit_time=$(echo "$date" | cut -d' ' -f2)
+            
+            # 새로운 날짜인 경우 헤더 추가
+            if [ "$commit_date" != "$current_date" ]; then
+              if [ -n "$current_date" ]; then
+                echo "" >> $CHANGELOG_SECTION
+              fi
+              echo "### 📅 $commit_date" >> $CHANGELOG_SECTION
+              echo "" >> $CHANGELOG_SECTION
+              current_date="$commit_date"
+            fi
+            
+            # 커밋 정보 추가 (메시지 길이 제한)
+            short_message=$(echo "$message" | cut -c1-80)
+            if [ ${#message} -gt 80 ]; then
+              short_message="${short_message}..."
+            fi
+            
+            echo "- **$commit_time** [\`$hash\`](https://github.com/${{ github.repository }}/commit/$hash) $short_message" >> $CHANGELOG_SECTION
+            echo "  *by $author*" >> $CHANGELOG_SECTION
+            
+          done < commits.txt
+
+          # 통계 정보 추가
+          echo "" >> $CHANGELOG_SECTION
+          echo "### 📊 프로젝트 통계" >> $CHANGELOG_SECTION
+          echo "" >> $CHANGELOG_SECTION
+
+          total_commits=$(git rev-list --count HEAD)
+          contributors=$(git log --format='%an' | sort -u | wc -l)
+          last_update=$(date '+%Y-%m-%d %H:%M:%S')
+
+          echo "- **총 커밋 수**: $total_commits" >> $CHANGELOG_SECTION
+          echo "- **기여자 수**: $contributors" >> $CHANGELOG_SECTION
+          echo "- **마지막 업데이트**: $last_update" >> $CHANGELOG_SECTION
+
+      - name: Update README with changelog
+        run: |
+          CHANGELOG_SECTION="temp_changelog.md"
+
+          # CHANGELOG 섹션이 없으면 추가
+          if ! grep -q "<!-- CHANGELOG_START -->" README.md; then
+            echo "" >> README.md
+            echo "<!-- CHANGELOG_START -->" >> README.md
+            echo "<!-- CHANGELOG_END -->" >> README.md
+          fi
+
+          # CHANGELOG 섹션 업데이트
+          awk '
+            /<!-- CHANGELOG_START -->/ { 
+              print $0
+              system("cat '$CHANGELOG_SECTION'")
+              skip=1
+              next
+            }
+            /<!-- CHANGELOG_END -->/ { 
+              skip=0
+            }
+            !skip
+          ' README.md > README_temp.md
+
+          mv README_temp.md README.md
+          rm $CHANGELOG_SECTION commits.txt
+
+          echo "Updated README.md with changelog"
+
       - name: Check for changes
         id: verify-changed-files
         run: |
@@ -153,5 +304,5 @@ jobs:
           git config --local user.email "abgoeun3339@gmail.com"
           git config --local user.name "goeun23"
           git add README.md
-          git commit -m "📚 Auto-update documentation index"
+          git commit -m "📚 Auto-update documentation index and changelog"
           git push
