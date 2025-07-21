@@ -26,6 +26,7 @@
 - [Next란](./Next/1.next.md)
 - [Next-Page Router](./Next/Page Router/2.Page-Router.md)
 - [Next pre-fetching](./Next/Page Router/pre-feching.md)
+- [Next.js의 Rendering](./Next/rendering.md)
 
 ### 📝 Others
 
