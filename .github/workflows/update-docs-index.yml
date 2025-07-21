@@ -79,73 +79,58 @@ jobs:
           echo "## 📚 Documentation" > $INDEX_FILE
           echo "" >> $INDEX_FILE
 
-          # React 문서
-          if [ -d "React" ] && [ "$(find React -name "*.md" -type f | wc -l)" -gt 0 ]; then
-            echo "### 📖 React" >> $INDEX_FILE
-            echo "" >> $INDEX_FILE
+          # 폴더별 문서 처리 함수
+          process_folder() {
+            local folder="$1"
+            local icon="$2"
+            local title="$3"
             
-            find React -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
+            if [ -d "$folder" ] && [ "$(find "$folder" -name "*.md" -type f | wc -l)" -gt 0 ]; then
+              echo "### $icon $title" >> $INDEX_FILE
+              echo "" >> $INDEX_FILE
               
-              if [ -z "$title" ]; then
-                title=$(basename "$file" .md)
-              fi
-              
-              echo "- [$title](./$file)" >> $INDEX_FILE
-            done
-            echo "" >> $INDEX_FILE
-          fi
+              # 폴더 구조를 트리 형태로 처리
+              find "$folder" -name "*.md" -type f | sort | while read file; do
+                # 파일의 디렉토리 경로 분석
+                dir_path=$(dirname "$file")
+                file_name=$(basename "$file")
+                
+                # 상대 경로에서 루트 폴더 제거
+                relative_path=${dir_path#$folder}
+                relative_path=${relative_path#/}
+                
+                # 들여쓰기 레벨 계산
+                if [ -z "$relative_path" ]; then
+                  indent=""
+                else
+                  depth=$(echo "$relative_path" | tr '/' '\n' | wc -l)
+                  indent=$(printf "%*s" $((depth * 2)) "")
+                fi
+                
+                # 파일 제목 추출
+                title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
+                
+                if [ -z "$title" ]; then
+                  title=$(basename "$file" .md)
+                fi
+                
+                # 하위 폴더가 있는 경우 폴더명도 표시
+                if [ -n "$relative_path" ]; then
+                  folder_name=$(basename "$dir_path")
+                  echo "${indent}- **$folder_name/** [$title](./$file)" >> $INDEX_FILE
+                else
+                  echo "${indent}- [$title](./$file)" >> $INDEX_FILE
+                fi
+              done
+              echo "" >> $INDEX_FILE
+            fi
+          }
 
-          # Next 문서
-          if [ -d "Next" ] && [ "$(find Next -name "*.md" -type f | wc -l)" -gt 0 ]; then
-            echo "### 🚀 Next" >> $INDEX_FILE
-            echo "" >> $INDEX_FILE
-            
-            find Next -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
-              
-              if [ -z "$title" ]; then
-                title=$(basename "$file" .md)
-              fi
-              
-              echo "- [$title](./$file)" >> $INDEX_FILE
-            done
-            echo "" >> $INDEX_FILE
-          fi
-
-          # Others 문서
-          if [ -d "Others" ] && [ "$(find Others -name "*.md" -type f | wc -l)" -gt 0 ]; then
-            echo "### 📝 Others" >> $INDEX_FILE
-            echo "" >> $INDEX_FILE
-            
-            find Others -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
-              
-              if [ -z "$title" ]; then
-                title=$(basename "$file" .md)
-              fi
-              
-              echo "- [$title](./$file)" >> $INDEX_FILE
-            done
-            echo "" >> $INDEX_FILE
-          fi
-
-          # docs 폴더 (기존 docs 폴더가 있다면)
-          if [ -d "docs" ] && [ "$(find docs -name "*.md" -type f | wc -l)" -gt 0 ]; then
-            echo "### 📋 Documentation" >> $INDEX_FILE
-            echo "" >> $INDEX_FILE
-            
-            find docs -name "*.md" -type f | sort | while read file; do
-              title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
-              
-              if [ -z "$title" ]; then
-                title=$(basename "$file" .md)
-              fi
-              
-              echo "- [$title](./$file)" >> $INDEX_FILE
-            done
-            echo "" >> $INDEX_FILE
-          fi
+          # 각 폴더 처리
+          process_folder "React" "📖" "React"
+          process_folder "Next" "🚀" "Next" 
+          process_folder "Others" "📝" "Others"
+          process_folder "docs" "📋" "Documentation"
 
           # 기타 중요 문서들
           echo "### 📋 Other Documents" >> $INDEX_FILE
@@ -248,15 +233,14 @@ jobs:
 
           # 통계 정보 추가
           echo "" >> $CHANGELOG_SECTION
-          echo "### 📊 프로젝트 통계" >> $CHANGELOG_SECTION
+          echo "### 📊 statstics" >> $CHANGELOG_SECTION
           echo "" >> $CHANGELOG_SECTION
 
           total_commits=$(git rev-list --count HEAD)
-          contributors=$(git log --format='%an' | sort -u | wc -l)
           last_update=$(date '+%Y-%m-%d %H:%M:%S')
 
           echo "- **총 커밋 수**: $total_commits" >> $CHANGELOG_SECTION
-          echo "- **기여자 수**: $contributors" >> $CHANGELOG_SECTION
+
           echo "- **마지막 업데이트**: $last_update" >> $CHANGELOG_SECTION
 
       - name: Update README with changelog
