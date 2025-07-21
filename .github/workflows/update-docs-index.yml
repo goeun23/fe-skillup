@@ -79,7 +79,7 @@ jobs:
           echo "## 📚 Documentation" > $INDEX_FILE
           echo "" >> $INDEX_FILE
 
-          # 폴더별 문서 처리 함수
+          # 폴더별 문서 처리 함수 (트리 구조)
           process_folder() {
             local folder="$1"
             local icon="$2"
@@ -89,39 +89,47 @@ jobs:
               echo "### $icon $title" >> $INDEX_FILE
               echo "" >> $INDEX_FILE
               
-              # 폴더 구조를 트리 형태로 처리
+              # 폴더별로 정리된 구조 생성
+              declare -A folder_files
+              
+              # 모든 .md 파일 찾기
               find "$folder" -name "*.md" -type f | sort | while read file; do
-                # 파일의 디렉토리 경로 분석
+                # 파일의 디렉토리 경로와 파일명 분리
                 dir_path=$(dirname "$file")
                 file_name=$(basename "$file")
                 
-                # 상대 경로에서 루트 폴더 제거
-                relative_path=${dir_path#$folder}
-                relative_path=${relative_path#/}
-                
-                # 들여쓰기 레벨 계산
-                if [ -z "$relative_path" ]; then
-                  indent=""
-                else
-                  depth=$(echo "$relative_path" | tr '/' '\n' | wc -l)
-                  indent=$(printf "%*s" $((depth * 2)) "")
-                fi
+                # 루트 폴더 기준 상대 경로
+                relative_dir=${dir_path#$folder}
+                relative_dir=${relative_dir#/}
                 
                 # 파일 제목 추출
-                title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null || basename "$file" .md)
-                
+                title=$(head -20 "$file" | grep -m 1 "^# " | sed 's/^# //' 2>/dev/null)
                 if [ -z "$title" ]; then
                   title=$(basename "$file" .md)
                 fi
                 
-                # 하위 폴더가 있는 경우 폴더명도 표시
-                if [ -n "$relative_path" ]; then
-                  folder_name=$(basename "$dir_path")
-                  echo "${indent}- **$folder_name/** [$title](./$file)" >> $INDEX_FILE
+                # 루트 폴더의 파일들
+                if [ -z "$relative_dir" ]; then
+                  echo "- [$title](./$file)" >> $INDEX_FILE
                 else
-                  echo "${indent}- [$title](./$file)" >> $INDEX_FILE
+                  # 하위 폴더의 파일들 - 폴더별로 그룹화
+                  folder_name=$(echo "$relative_dir" | cut -d'/' -f1)
+                  
+                  # 폴더명을 한 번만 표시하기 위한 체크
+                  if ! grep -q "**📁 $folder_name**" $INDEX_FILE 2>/dev/null; then
+                    echo "  - **📁 $folder_name**" >> $INDEX_FILE
+                  fi
+                  
+                  # 더 깊은 하위 폴더가 있는 경우
+                  if echo "$relative_dir" | grep -q '/'; then
+                    subfolder=$(echo "$relative_dir" | cut -d'/' -f2-)
+                    echo "    - [$title](./$file) *($subfolder)*" >> $INDEX_FILE
+                  else
+                    echo "    - [$title](./$file)" >> $INDEX_FILE
+                  fi
                 fi
               done
+              
               echo "" >> $INDEX_FILE
             fi
           }
@@ -233,14 +241,15 @@ jobs:
 
           # 통계 정보 추가
           echo "" >> $CHANGELOG_SECTION
-          echo "### 📊 statstics" >> $CHANGELOG_SECTION
+          echo "### 📊 프로젝트 통계" >> $CHANGELOG_SECTION
           echo "" >> $CHANGELOG_SECTION
 
           total_commits=$(git rev-list --count HEAD)
+          contributors=$(git log --format='%an' | sort -u | wc -l)
           last_update=$(date '+%Y-%m-%d %H:%M:%S')
 
           echo "- **총 커밋 수**: $total_commits" >> $CHANGELOG_SECTION
-
+          echo "- **기여자 수**: $contributors" >> $CHANGELOG_SECTION
           echo "- **마지막 업데이트**: $last_update" >> $CHANGELOG_SECTION
 
       - name: Update README with changelog
