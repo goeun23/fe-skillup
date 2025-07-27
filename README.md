@@ -19,6 +19,7 @@
 - [useRef](./React/6-5.react-useRef.md)
 - [Hooks](./React/6-6.react-hooks.md)
 - [라이프사이클](./React/8.react-lifecycle.md)
+- [React Query](./React/ReactQuery.md)
 
 ### 🚀 Next
 
@@ -30,6 +31,8 @@
 
 ### 📝 Others
 
+- [Design Pattern을 배워야하는 이유](./Others/0.desgin Patern을 배워햐하는 이유.md)
+- [SOLID 원칙](./Others/SOLID원칙.md)
 - [React와 Vue의 차이점](./Others/react vs_vue.md)
 
 ### 📋 Other Documents
