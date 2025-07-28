@@ -29,13 +29,15 @@
 - [Routing](./Next/App Router/routing.md)
 - [Incremental Static Regeneration](./Next/ISR-Rendering.md)
 - [Next-Page Router](./Next/Page Router/2.Page-Router.md)
-- [Next pre-fetching](./Next/Page Router/pre-feching.md)
+- [Next pre-fetching](./Next/Page Router/pre-fetching.md)
 - [Static Generation(SG)](./Next/SG-Rendering.md)
 - [Next.js의 Rendering](./Next/rendering.md)
 
 ### 📝 Others
 
-- [Design Pattern을 배워야하는 이유](./Others/0.desgin-Patern.md)
+- [Design Pattern을 배워야하는 이유](./Others/0.DesginPattern.md)
+- [행동 패턴](./Others/BehavioralPatterns.md)
+- [생성 패턴](./Others/CreationalPatterns.md)
 - [SOLID 원칙](./Others/SOLID원칙.md)
 - [React와 Vue의 차이점](./Others/react&vue.md)
 
