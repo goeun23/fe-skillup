@@ -86,3 +86,76 @@ pages/ : 클래식 Next.js 방식으로, 모든게 클라이언트 컴포넌트
 - Client-side Rendering 기반
 - 라우팅 방식 : 단일 페이지 단위
 - 기능 : getServerSideProps, getStaticProps 등으로 데이터 패칭
+
+## Next.js 의 Pre-Rendering은 어디서 나온 개념?
+
+Next.js의 Pre-rendering 개념은 React는 기본적으로 Client-Side-Rendering 만 제공하기 때문에, 이를 보완하기 위해 Next.js가 도입한 기능
+
+- React 자체엔 pre-rendering 기능이 없다.
+- Next.js가 초기 로딩 속도, SEO, 성능 최적화를 위해 도입한 전략
+  -> 페이지를 요청 받기 전에(혹은 요청시) HTML을 미리 생성해서 클라이언트에 전송하는 방식
+- Next.js의 렌더링 방식 중 일부가 pre-rendering 이지만, 모든 렌더링 방식이 pre-rendering 은 아니다.
+
+### 종류
+
+#### Static Generation (SG)
+
+- 빌드 시 HTML 생성(getStaticProps, generateStaticParams)
+- 빠름, CDN 캐시 가능
+
+#### Server-Side Rendering (SSR)
+
+- 요청시 HTML 생성
+- 항상 최신, 느림
+
+### ✅ 렌더링 방식 4가지 요약 (Next.js 기준)
+
+| 렌더링 방식                               | pre-rendering 여부 | 설명                       |
+| ----------------------------------------- | ------------------ | -------------------------- |
+| **Static Generation (SG)**                | ✅ O               | 빌드 시 HTML 미리 생성     |
+| **Server-Side Rendering (SSR)**           | ✅ O               | 요청 시 서버에서 HTML 생성 |
+| **Client-Side Rendering (CSR)**           | ❌ X               | 브라우저에서 JS로 렌더링   |
+| **Incremental Static Regeneration (ISR)** | ✅ O               | SG + 주기적 재생성         |
+
+### 핵심 요점
+
+- Pre-rendering : HTML을 서버에서 미리 만들어서 보내는 방식(SG, SSR, ISR 포함)
+- CSR은 브라우저에서 JS로 동작 -> pre-rendering 이 아님
+- Next.js는 모든 렌더링 방식을 제공하고, 필요에 따라 개발자가 선택함.
+
+-> Next.js의 렌더링 방식은, pre-rendering + CSR 을 조합해서 사용하는 아키텍처 이다.
+
+## App Router에서 pre-rendering 기본 동작
+
+- app/page.tsx, app/layout.tsx는 기본적으로 서버 컴포넌트 -> SSR 처럼 작동
+- 특별히 설정하지 않으면 모든 페이지는 pre-render됨
+
+#### 자동 pre-render 조건
+
+- 서버 컴포넌트만 있으면 Static Rendering 적용
+- 동적 데이터(fetch 등) 를 사용하면 자동으로 SSR 적용됨
+- 동적 경로/params 쓸 경우, generateStaticParams 로 SG 가능
+
+### 렌더링 방법 결정 조건
+
+기본은 자동 결정이고, 원하면 명시적으로 렌더링 방식을 제어할 수 있다.
+
+- fetch() 사용 방식, dynamic 설정, generateStaticParams 유무 등을 보고 Next.js가 알아서 SG/SSR/ISR 중 하나로 렌더링 방식 결정
+
+```
+// 자동 static (기본 캐시 사용)
+await fetch('https://api.com', {cache : 'force-cache'})
+
+// 자동 SSR (실시간 데이터)
+await fetch("https://api.com", {cache : "no-store"})
+```
+
+- 필요 시 명시 설정도 가능
+
+```
+export const dynamic = 'force-static'
+export const dynamic = 'force-dynamic'
+export const revalidate = 60(ISR)
+```
+
+> 자동 결정하지만, 명시적으로 강제적으로 설정할 수 있다.
