@@ -20,11 +20,13 @@
 - [Hooks](./React/6-6.react-hooks.md)
 - [라이프사이클](./React/8.react-lifecycle.md)
 - [React Query](./React/ReactQuery.md)
+- [Server Component, Client Component](./React/SeverComponent vs. Client component.md)
 
 ### 🚀 Next
 
 - [Next의 pre-rendering](./Next/1-2.pre-rendering.md)
 - [Next란](./Next/1.next.md)
+- [Routing](./Next/App Router/routing.md)
 - [Next-Page Router](./Next/Page Router/2.Page-Router.md)
 - [Next pre-fetching](./Next/Page Router/pre-feching.md)
 - [Next.js의 Rendering](./Next/rendering.md)
