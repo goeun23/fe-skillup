@@ -27,8 +27,10 @@
 - [Next의 pre-rendering](./Next/1-2.pre-rendering.md)
 - [Next란](./Next/1.next.md)
 - [Routing](./Next/App Router/routing.md)
+- [Incremental Static Regeneration](./Next/ISR Rendering.md)
 - [Next-Page Router](./Next/Page Router/2.Page-Router.md)
 - [Next pre-fetching](./Next/Page Router/pre-feching.md)
+- [Static Generation(SG)](./Next/SG Rendering.md)
 - [Next.js의 Rendering](./Next/rendering.md)
 
 ### 📝 Others
