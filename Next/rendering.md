@@ -69,3 +69,20 @@ React의 "use client" 지시어를 사용하여 경계를 정의할 수 있다. 
 Partial Prerendering은 동일한 경로에서 정적 렌더링과 동적 렌더링의 이점을 결합하는 렌더링 전략이다. PPR을 사용하면 Suspense 경계 안에 동적 컴포넌트를 감쌀 수 있다.
 새로운 요청이 들어오면 Next.js는 캐시에서 즉시 정적 HTML 셸을 제공한 다음, 동적 부분을 동일한 HTTP 요청에서 렌더링하고 스트리밍한다.
 https://nextjs-ko.org/docs/app/building-your-application/rendering/server-components
+
+## App router, Page router의 핵심 차이
+
+app/ : 모듈화된 레이아웃과 서버 렌더링 최적화 중심(Next.js 13+표준)
+pages/ : 클래식 Next.js 방식으로, 모든게 클라이언트 컴포넌트
+
+### App router(app/)
+
+- React Server Component 기반
+- 라우팅 방식 : 파일 + 중첩 layout 구성
+- 기능 : 서버/클라이언트 컴포넌트 분리, loading.tsx, error.tsx, layout.tsx 지원
+
+### Page Router(pages/)
+
+- Client-side Rendering 기반
+- 라우팅 방식 : 단일 페이지 단위
+- 기능 : getServerSideProps, getStaticProps 등으로 데이터 패칭
