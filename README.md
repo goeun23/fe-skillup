@@ -20,24 +20,24 @@
 - [Hooks](./React/6-6.react-hooks.md)
 - [라이프사이클](./React/8.react-lifecycle.md)
 - [React Query](./React/ReactQuery.md)
-- [Server Component, Client Component](./React/SeverComponent vs. Client component.md)
+- [Server Component, Client Component](./React/SeverComponent-Clientcomponent.md)
 
 ### 🚀 Next
 
 - [Next의 pre-rendering](./Next/1-2.pre-rendering.md)
 - [Next란](./Next/1.next.md)
 - [Routing](./Next/App Router/routing.md)
-- [Incremental Static Regeneration](./Next/ISR Rendering.md)
+- [Incremental Static Regeneration](./Next/ISR-Rendering.md)
 - [Next-Page Router](./Next/Page Router/2.Page-Router.md)
 - [Next pre-fetching](./Next/Page Router/pre-feching.md)
-- [Static Generation(SG)](./Next/SG Rendering.md)
+- [Static Generation(SG)](./Next/SG-Rendering.md)
 - [Next.js의 Rendering](./Next/rendering.md)
 
 ### 📝 Others
 
-- [Design Pattern을 배워야하는 이유](./Others/0.desgin Patern을 배워햐하는 이유.md)
+- [Design Pattern을 배워야하는 이유](./Others/0.desgin-Patern.md)
 - [SOLID 원칙](./Others/SOLID원칙.md)
-- [React와 Vue의 차이점](./Others/react vs_vue.md)
+- [React와 Vue의 차이점](./Others/react&vue.md)
 
 ### 📋 Other Documents
 
